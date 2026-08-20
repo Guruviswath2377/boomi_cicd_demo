@@ -447,64 +447,39 @@ jobs:
             echo "Boomi response:"
             jq . execution_record_response.json
 
-            #
-            # IMPORTANT:
-            # Your Boomi account returns:
-            #
-            # {
-            #   "@type": "AsyncOperationResult",
-            #   "result": [
-            #     {
-            #       "@type": "ExecutionRecord",
-            #       ...
-            #     }
-            #   ]
-            # }
-            #
-            # The expressions below intentionally read result[0].
-            # They also support a direct ExecutionRecord response.
-            #
+            JQ_RECORD_FILTER='
+              if (.result | type) == "array" then .result[0]
+              elif (.result | type) == "object" then .result
+              else .
+              end
+            '
 
             STATUS="$(
-              jq -r '
-                (.result[0] // .).status // empty
-              ' execution_record_response.json
+              jq -r "${JQ_RECORD_FILTER} | .status // empty" execution_record_response.json
             )"
 
             EXECUTION_ID="$(
-              jq -r '
-                (.result[0] // .).executionId // empty
-              ' execution_record_response.json
+              jq -r "${JQ_RECORD_FILTER} | .executionId // empty" execution_record_response.json
             )"
 
             RETURNED_PROCESS_NAME="$(
-              jq -r '
-                (.result[0] // .).processName // empty
-              ' execution_record_response.json
+              jq -r "${JQ_RECORD_FILTER} | .processName // empty" execution_record_response.json
             )"
 
             RETURNED_PROCESS_ID="$(
-              jq -r '
-                (.result[0] // .).processId // empty
-              ' execution_record_response.json
+              jq -r "${JQ_RECORD_FILTER} | .processId // empty" execution_record_response.json
             )"
 
             RETURNED_ATOM_NAME="$(
-              jq -r '
-                (.result[0] // .).atomName // empty
-              ' execution_record_response.json
+              jq -r "${JQ_RECORD_FILTER} | .atomName // empty" execution_record_response.json
             )"
 
             RETURNED_ATOM_ID="$(
-              jq -r '
-                (.result[0] // .).atomId // empty
-              ' execution_record_response.json
+              jq -r "${JQ_RECORD_FILTER} | .atomId // empty" execution_record_response.json
             )"
 
             MESSAGE="$(
-              jq -r '
-                (.result[0] // .).message // empty
-              ' execution_record_response.json
+              jq -r "${JQ_RECORD_FILTER} | .message // empty" execution_record_response.json
             )"
 
             echo "=========================================="
